@@ -219,6 +219,23 @@ public final class CharTypes
     {
         final int[] escCodes = sOutputEscapes128;
         int escLen = escCodes.length;
+        
+        //based on previous experiments, the most of input's data does not contains chars whose ascii value less than 32.
+	    //add this condition to avoid unnecessary append operation, which will casue bad performance.
+        boolean noNeedToEscape = true;
+        for (int i = 0, len = content.length(); i < len; ++i) {
+            char c = content.charAt(i);
+            if (!(c >= escLen || escCodes[c] == 0)) {
+                noNeedToEscape = false;
+                break;
+            }
+        }
+
+        if(noNeedToEscape) {
+            sb.append(content);
+            return;
+        }
+
         for (int i = 0, len = content.length(); i < len; ++i) {
             char c = content.charAt(i);
             if (c >= escLen || escCodes[c] == 0) {
